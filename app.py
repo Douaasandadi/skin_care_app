@@ -10,7 +10,7 @@ api_key = st.text_input("Enter your Google Gemini API Key:", type="password")
 if api_key:
     genai.configure(api_key=api_key)
     # هادو هما الموديلات اللي خدامين دابا
-    model = genai.GenerativeModel("gemini-2.0-flash") 
+    model = genai.GenerativeModel("gemini-3.8-flash") 
 
     uploaded_file = st.file_uploader("Choose or take a photo", type=["jpg","png","jpeg"])
     
