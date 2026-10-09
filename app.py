@@ -22,8 +22,9 @@ if uploaded_file is not None:
         else:
             try:
                 genai.configure(api_key=api_key)
-                # Call Gemini model capable of analyzing images
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                
+            
+                model = genai.GenerativeModel('models/gemini-1.5-flash-latest')
                 
                 with st.spinner('Analyzing your skin with Gemini...'):
                     prompt = "You are a professional dermatologist. Analyze this skin image, identify any visible issues (like acne, dryness, redness, etc.), and provide a structured, helpful skincare routine and recommendations."
@@ -33,4 +34,3 @@ if uploaded_file is not None:
                     st.write(response.text)
             except Exception as e:
                 st.error(f"An error occurred: {e}")
-                              
