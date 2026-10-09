@@ -2,35 +2,34 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
-st.set_page_config(page_title="Smart Skin Care Assistant", page_icon="✨")
-
+st.set_page_config(page_title="Smart Skin Care Assistant")
 st.title("✨ Smart Skin Care Assistant (Gemini)")
-st.write("Upload a photo of your face or the area you want to check, and Gemini AI will analyze it and provide a suitable skincare routine.")
 
-# Enter Google Gemini API Key (Free)
 api_key = st.text_input("Enter your Google Gemini API Key:", type="password")
 
-uploaded_file = st.file_uploader("Choose or take a photo of your skin...", type=["jpg", "jpeg", "png"])
+if api_key:
+    genai.configure(api_key=api_key)
+    # هادو هما الموديلات اللي خدامين دابا
+    model = genai.GenerativeModel("gemini-2.0-flash") 
 
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption='Uploaded Skin Image', use_column_width=True)
+    uploaded_file = st.file_uploader("Choose or take a photo", type=["jpg","png","jpeg"])
     
-    if st.button("Analyze Skin"):
-        if not api_key:
-            st.error("Please enter your Gemini API Key first!")
-        else:
-            try:
-                genai.configure(api_key=api_key)
-                
-            
-                model = genai.GenerativeModel('gemini-1.5-flash-001')
-                
-                with st.spinner('Analyzing your skin with Gemini...'):
-                    prompt = "You are a professional dermatologist. Analyze this skin image, identify any visible issues (like acne, dryness, redness, etc.), and provide a structured, helpful skincare routine and recommendations."
+    if uploaded_file:
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Image", use_column_width=True)
+
+        if st.button("Analyze Skin"):
+            with st.spinner("كَنحلل..."):
+                try:
+                    prompt = """
+                    أنت مساعد معلوماتي عام حول نظافة البشرة فقط.
+                    لا تقدم تشخيص طبي أبدا. لا تذكر اسم مرض.
+                    صف ما تراه بوصف عام فقط (مثال: احمرار خفيف، مسام، جفاف)
+                    ثم قدم 3 نصائح عامة للنظافة (غسول لطيف، ترطيب non-comedogenic، واقي شمس)
+                    وختم بهذه الجملة حرفيا: هذه معلومات عامة فقط، ليست تشخيص طبي، يرجى استشارة صيدلي أو طبيب جلد إذا استمر الأمر.
+                    """
                     response = model.generate_content([prompt, image])
-                    
-                    st.subheader("Skincare Analysis & Routine:")
+                    st.success("النتيجة:")
                     st.write(response.text)
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
+                except Exception as e:
+                    st.error(f"Error: {e}")
