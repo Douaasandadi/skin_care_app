@@ -2,34 +2,45 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
-st.set_page_config(page_title="Smart Skin Care Assistant")
-st.title("✨ Smart Skin Care Assistant (Gemini)")
+st.set_page_config(page_title="Smart Skin Care Assistant", page_icon="✨")
+st.title("✨ Smart Skin Care - نصائح عامة")
+st.write("هاد التطبيق كيعطي نصائح عامة للنظافة فقط، ماشي تشخيص طبي.")
 
-api_key = st.text_input("Enter your Google Gemini API Key:", type="password")
+# 1. API Key
+api_key = st.text_input("دخل Google Gemini API Key ديالك:", type="password")
 
-if api_key:
-    genai.configure(api_key=api_key)
-    # هادو هما الموديلات اللي خدامين دابا
-    model = genai.GenerativeModel("gemini-3.8-flash") 
+if not api_key:
+    st.info("دخل الـ API Key باش يخدم التطبيق.")
+    st.stop()
 
-    uploaded_file = st.file_uploader("Choose or take a photo", type=["jpg","png","jpeg"])
-    
-    if uploaded_file:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+genai.configure(api_key=api_key)
 
-        if st.button("Analyze Skin"):
-            with st.spinner("كَنحلل..."):
-                try:
-                    prompt = """
-                    أنت مساعد معلوماتي عام حول نظافة البشرة فقط.
-                    لا تقدم تشخيص طبي أبدا. لا تذكر اسم مرض.
-                    صف ما تراه بوصف عام فقط (مثال: احمرار خفيف، مسام، جفاف)
-                    ثم قدم 3 نصائح عامة للنظافة (غسول لطيف، ترطيب non-comedogenic، واقي شمس)
-                    وختم بهذه الجملة حرفيا: هذه معلومات عامة فقط، ليست تشخيص طبي، يرجى استشارة صيدلي أو طبيب جلد إذا استمر الأمر.
-                    """
-                    response = model.generate_content([prompt, image])
-                    st.success("النتيجة:")
-                    st.write(response.text)
-                except Exception as e:
-                    st.error(f"Error: {e}")
+# 2. استعمل موديل اللي خدام دابا ومكيبلوكيش
+# جربنا 3.8-flash و flash-latest هما اللي خدامين
+model = genai.GenerativeModel("gemini-flash-latest")
+
+uploaded_file = st.file_uploader("حط تصويرة واضحة (غير للوجه قريبة)", type=["jpg","jpeg","png"])
+
+if uploaded_file:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
+
+    if st.button("Get General Tips"):
+        with st.spinner("كنوجد ليك نصائح عامة..."):
+            try:
+                prompt = """
+                You are a general cosmetic hygiene assistant.
+                DO NOT provide medical diagnosis. DO NOT name any disease or skin condition.
+                Only describe the image in general cosmetic terms like lighting, general appearance.
+                Then give 3 short general hygiene tips: gentle cleanser, non-comedogenic moisturizer, sunscreen.
+                End with exactly this sentence in Arabic: هذه معلومات تجميلية عامة فقط وليست نصيحة طبية، يرجى استشارة صيدلي أو طبيب إذا لزم الأمر.
+                Keep it short and friendly.
+                """
+
+                response = model.generate_content([prompt, image])
+                st.success("النتيجة - نصائح عامة:")
+                st.write(response.text)
+
+            except Exception as e:
+                st.error(f"Error: {e}")
+                st.warning("إلا شفتي Error 403: سيري لـ aistudio.google.com وديري Create API Key in NEW project، حيث القديم تبلوكا.")
