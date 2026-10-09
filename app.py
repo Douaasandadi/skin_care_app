@@ -24,7 +24,7 @@ if uploaded_file is not None:
                 genai.configure(api_key=api_key)
                 
             
-                model = genai.GenerativeModel('models/gemini-1.5-flash-latest')
+                model = genai.GenerativeModel('gemini-pro-vision')
                 
                 with st.spinner('Analyzing your skin with Gemini...'):
                     prompt = "You are a professional dermatologist. Analyze this skin image, identify any visible issues (like acne, dryness, redness, etc.), and provide a structured, helpful skincare routine and recommendations."
